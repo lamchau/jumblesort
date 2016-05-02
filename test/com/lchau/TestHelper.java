@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public enum TestHelper {
+enum TestHelper {
   ;
 
   public static <T> String[] shuffle(T[] array) {

@@ -16,9 +16,18 @@
 
 
   <!-- ivy -->
+  <!--
   <property name="ivy.install.version" value="2.4.0" />
   <property name="ivy.jar.file" value="${ant.library.dir}/ivy.jar" />
-
+  -->
+  <!-- travis -->
+  <property name="ivy.install.version" value="2.4.0" />
+  <condition property="ivy.home" value="${env.IVY_HOME}">
+    <isset property="env.IVY_HOME" />
+  </condition>
+  <property name="ivy.home" value="${user.home}/.ant" />
+  <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
 
   <!-- output -->
   <property name="jar.dir" value="${build.dir}/jar" />
@@ -75,17 +84,20 @@
     <ivy:cleancache />
   </target>
 
-   <target name="install-ivy" unless="skip.download">
-    <mkdir dir="${ant.library.dir}" />
-    <get dest="${ivy.jar.file}" usetimestamp="true"
-      src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" />
+  <target name="install-ivy" unless="skip.download">
+   <!--
+   <mkdir dir="${ant.library.dir}" />
+  -->
+  <!-- travis -->
+  <mkdir dir="${ivy.jar.dir}" />
+   <get dest="${ivy.jar.file}" usetimestamp="true"
+        src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" />
 
     <path id="ivy.lib.path">
       <fileset dir="${ant.library.dir}" includes="*.jar" />
     </path>
     <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
   </target>
-
 
   <!-- app tasks -->
   <target name="main" depends="jar" />
@@ -125,7 +137,7 @@
       </classpath>
       <batchtest fork="yes" todir="${reports.dir}">
         <fileset dir="test">
-          <include name="**/*Test*" />
+          <include name="**/JUnitTestSuite*" />
         </fileset>
       </batchtest>
       <formatter type="brief" usefile="false" />

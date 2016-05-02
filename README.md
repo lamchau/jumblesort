@@ -1,5 +1,7 @@
 # Jumblesort
 
+[![Build Status](https://travis-ci.org/lamchau/jumblesort.svg?branch=master)](https://travis-ci.org/lamchau/jumblesort)
+
 ### Prerequisites
   * **Java 1.8** - via [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   * **JUnit 4.12** (optional; included in `./lib`)
