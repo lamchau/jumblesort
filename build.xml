@@ -1,0 +1,138 @@
+<project name="jumblesort"
+    basedir="."
+    default="main"
+    xmlns:ivy="antlib:org.apache.ivy.ant"
+    xmlns:unless="ant:unless">
+  <!-- application -->
+  <property name="project.name" value="${ant.project.name}" />
+
+  <property name="lib.dir" value="lib" />
+  <property name="src.dir" value="src" />
+  <property name="test.dir" value="test" />
+
+  <property name="build.dir" value="build" />
+  <property name="classes.dir" value="${build.dir}/classes" />
+  <property name="reports.dir" value="${build.dir}/reports" />
+
+
+  <!-- ivy -->
+  <property name="ivy.install.version" value="2.4.0" />
+  <property name="ivy.jar.file" value="${ant.library.dir}/ivy.jar" />
+
+
+  <!-- output -->
+  <property name="jar.dir" value="${build.dir}/jar" />
+  <property name="jar" value="${jar.dir}/${ant.project.name}.jar" />
+
+  <property name="main-class" value="com.lchau.Program" />
+
+
+  <!-- classpaths -->
+  <path id="classpath"></path>
+
+  <path id="classpath.test">
+    <fileset dir="${lib.dir}/test">
+      <include name="**/*.jar" />
+    </fileset>
+    <pathelement path="${build.dir}" />
+  </path>
+
+
+  <!-- macros -->
+  <macrodef name="compile">
+    <attribute name="srcdir" />
+    <attribute name="destdir" default="${classes.dir}" />
+    <attribute name="includeant" default="false" />
+    <attribute name="classpath" default="classpath" />
+    <sequential>
+      <javac
+        srcdir="@{srcdir}"
+        classpathref="@{classpath}"
+        destdir="@{destdir}"
+        includeAntRuntime="@{includeant}"
+        debug="${compile.debug}"
+        debugLevel="${compile.debugLevel}"
+        deprecation="${compile.deprecation}"
+        optimize="${compile.optimize}" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="get-libs">
+    <attribute name="type" />
+    <sequential>
+      <ivy:retrieve
+          conf="@{type}"
+          sync="${sync.libs}"
+          pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"
+          unless:true="${skip.download}"
+      />
+    </sequential>
+  </macrodef>
+
+
+  <!-- ivy tasks -->
+  <target name="clean-cache">
+    <ivy:cleancache />
+  </target>
+
+   <target name="install-ivy" unless="skip.download">
+    <mkdir dir="${ant.library.dir}" />
+    <get dest="${ivy.jar.file}" usetimestamp="true"
+      src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" />
+
+    <path id="ivy.lib.path">
+      <fileset dir="${ant.library.dir}" includes="*.jar" />
+    </path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+  </target>
+
+
+  <!-- app tasks -->
+  <target name="main" depends="jar" />
+
+  <target name="clean">
+    <delete includeemptydirs="true" quiet="true">
+      <fileset dir="${build.dir}" includes="**/*" />
+    </delete>
+    <mkdir dir="${build.dir}" />
+  </target>
+
+  <target name="compile" depends="clean,install-ivy">
+    <mkdir dir="${classes.dir}" />
+    <get-libs type="compile" />
+    <compile srcdir="${src.dir}" />
+  </target>
+
+  <target name="compile-test" depends="compile">
+    <get-libs type="test" />
+    <compile srcdir="${test.dir}" classpath="classpath.test" />
+  </target>
+
+  <target name="jar" depends="compile">
+    <mkdir dir="${jar.dir}" />
+    <jar destfile="${jar}" basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="test" depends="compile-test">
+    <junit fork="yes" description="unit tests" showoutput="true" printsummary="true" outputtoformatters="true">
+      <classpath>
+        <path refid="classpath.test" />
+        <pathelement location="${classes.dir}" />
+      </classpath>
+      <batchtest fork="yes" todir="${reports.dir}">
+        <fileset dir="test">
+          <include name="**/*Test*" />
+        </fileset>
+      </batchtest>
+      <formatter type="brief" usefile="false" />
+    </junit>
+  </target>
+
+  <target name="update-libs">
+    <get-libs type="*" />
+  </target>
+</project>

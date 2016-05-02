@@ -1,0 +1,12 @@
+<ivy-module version="2.0">
+  <info organisation="apache" module="jumble-sort" />
+  <configurations>
+    <conf name="compile" visibility="public" />
+    <conf name="development" visibility="public" />
+    <conf name="test" visibility="public" />
+  </configurations>
+  <dependencies>
+    <dependency org="junit" name="junit" rev="4.12" conf="test->*" />
+    <dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" conf="test->*"/>
+  </dependencies>
+</ivy-module>
